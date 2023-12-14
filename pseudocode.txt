@@ -83,32 +83,39 @@
 }
 
 - Dataset = Row[]
+
 - NeuralNetwork: {
   layers: Layer[]
-  cost_function: DerivableFunction
-  learning_rate: float
+  training_dataset: Dataset
+  testing_dataset: Dataset
 }
 
 # weights[i][j] is the weight going from the previous layer of node i to the current layer of node j
 # Measuring accuracy is applying summing cost function on all output layers on all rows
 
+- get_input_layer_mut(layers)
+  - return layers[0]
+
+- get_output_layer_mut(layers)
+  - return layers[layers.len() - 1]
+
 - forward_propagation(inputs, layers)
-  - layers[0].outputs = inputs.clone()
+  - get_input_layer_mut(layers).outputs = inputs.clone()
   - For l 1..layers.len()
     - layer = mutable reference layers[l]
     - inputs = layers[l - 1].outputs * layer.weights_in
     - layer.outputs = inputs.map(inp => layer.activation_function.apply(inp))
 
-- NeuralNetwork.train(no_epochs, learning_rate, training_dataset, testing_dataset)
+- NeuralNetwork.train(no_epochs, learning_rate, cost_function)
   - layers = mutable reference self.layers
   - For epoch 1..=no_epochs
-    - For row in training_dataset
+    - For row in self.training_dataset
       - forward_propagation(inputs, layers)
       # Backward propagation
-      - output_layer = mutable reference layers[layers.size() - 1]
+      - output_layer = get_output_layer_mut(layers)
       - for i = 0..output_layer.outputs.size()
         - output = output_layer.outputs[i]
-        - output_layer.errors[i] = self.cost_function.apply_derivative(output, row.outputs[i])
+        - output_layer.errors[i] = cost_function.apply_derivative(output, row.outputs[i])
           * output_layer.activation_function.apply_derivative(output)
       - for l = layers.size()-2..=0
         - layer = mutable reference layers[l]
@@ -127,18 +134,18 @@
               learning_rate * layer.errors[current_node_index] * layers[l-1].outputs[prev_node_index]
     # Measuring accuracy
     - error = 0
-    - For row in testing_dataset
+    - For row in self.testing_dataset
       - forward_propagation(row.inputs, layers)
-      - output_layer = layers[layers.size() - 1]
+      - output_layer = get_output_layer_mut(layers)
       - for i 0..output_layer.size
-        - error += neural_network.cost_function.apply(output_layer.outputs[i], row.outputs[i])
+        - error += cost_function.apply(output_layer.outputs[i], row.outputs[i])
     - print("Epoch #$epoch, error: $error")
 
-- NeuralNetwork.initialize(learning_rate, cost_function)
+- NeuralNetwork.new()
   - return self {
-    cost_function,
-    learning_rate,
-    layers: []
+    layers: [],
+    training_dataset: [],
+    testing_dataset: []
   }
 
 - NeuralNetwork.add_layer(size, activation_function)
@@ -150,3 +157,45 @@
   - errors = vec[size]
   - self.layers.push(Layer { size, weights_in, outputs, errors, activation_function })
   - return self
+
+- NeuralNetwork.add_row(inputs, outputs, dataset)
+  - if self.layers.len() < 2
+    - panic("At least an input and output layer must exist before adding a dataset rot")
+  - if inputs.len() != get_input_layer(self.layers).len()
+    - panic("Size of dataset inputs mismatches with size of input layer")
+  - if outputs.len() != get_output_Layer(self.layers).len()
+    - panic("Size of dataset outputs mismatches with size of output layer")
+  - dataset.push(Row { inputs, outputs })
+  - return self
+
+- NeuralNetwork.add_training_row(inputs, outputs)
+  - return self.add_row(inputs, outputs, self.training_dataset)
+
+- NeuralNetwork.add_training_row(inputs, outputs)
+  - return self.add_row(inputs, outputs, self.testing_dataset)
+
+- NeuralNetwork.get_outputs()
+  - return get_output_layer(self.layers).outputs.clone()
+
+- main
+  - neural_network = NeuralNetwork::new()
+  - neural_network
+    .add_layer(4, sigmoid)
+    .add_layer(8, sigmoid)
+    .add_layer(1, linear)
+  - for i in 1..=2
+  - read no_training_inputs
+  - while no_training_inputs--
+    - i1, i2, i3, i4 = read
+    - o = read
+    - inputs = [i1, i2, i3, i4]
+    - outputs = [o]
+    - if i == 1
+      - neural_network.add_training_row(inputs, outputs)
+    - else
+      - neural_network.add_testing_row(inputs, outputs)
+  - neural_network.train(11, 0.1, mean_squared_error)
+  - while true
+    - i = read float
+    - neural_network.forward_propagation(i)
+    - print(neural_network.get_outputs())
