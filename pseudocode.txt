@@ -83,30 +83,32 @@
 }
 
 - Dataset = Row[]
-- Neural
-- Neural network: {
+- NeuralNetwork: {
   layers: Layer[]
   cost_function: DerivableFunction
   learning_rate: float
 }
 
 # weights[i][j] is the weight going from the previous layer of node i to the current layer of node j
+# Measuring accuracy is applying summing cost function on all output layers on all rows
 
-- train(no_epochs, learning_rate, neural_network, dataset)
-  - layers = neural_network.layers
+- forward_propagation(inputs, layers)
+  - layers[0].outputs = inputs.clone()
+  - For l 1..layers.len()
+    - layer = mutable reference layers[l]
+    - inputs = layers[l - 1].outputs * layer.weights_in
+    - layer.outputs = inputs.map(inp => layer.activation_function.apply(inp))
+
+- NeuralNetwork.train(no_epochs, learning_rate, training_dataset, testing_dataset)
+  - layers = mutable reference self.layers
   - For epoch 1..=no_epochs
-    - For row in dataset
-      - layers[0].outputs = row.inputs
-      # Forward propagation
-      - For l 1..layers.len()
-        - layer = mutable reference layers[l]
-        - inputs = layers[l - 1].outputs * layer.weights_in
-        - layer.outputs = inputs.map(inp => layer.activation_function.apply(inp))
+    - For row in training_dataset
+      - forward_propagation(inputs, layers)
       # Backward propagation
       - output_layer = mutable reference layers[layers.size() - 1]
       - for i = 0..output_layer.outputs.size()
         - output = output_layer.outputs[i]
-        - output_layer.errors[i] = neural_network.cost_function.apply_derivative(output, row.outputs[i])
+        - output_layer.errors[i] = self.cost_function.apply_derivative(output, row.outputs[i])
           * output_layer.activation_function.apply_derivative(output)
       - for l = layers.size()-2..=0
         - layer = mutable reference layers[l]
@@ -114,12 +116,37 @@
         - for n = 0..layer.size
           - weighted_errors_sum = 0
           - for i = 0..layers[l + 1].size
-            - weighted_errors_sum = neighbor_layer.weights[n][i] * neighbor_layer.errors[i]
+            - weighted_errors_sum = neighbor_layer.weights_in[n][i] * neighbor_layer.errors[i]
           - layer.errors[n] = weighted_sum * layer.activation_function.apply_derivative(layer.outputs[n])
       - for l = 1..layers.size()
         - layer = layers[l]
-        - weights = mutable reference layer.weights
+        - weights = mutable reference layer.weights_in
         - for prev_node_index = 0..weights.len()
-          - for current_node_index = 0..weights[prev_node_index].len()
+          - for current_node_index = 0..weights_in[prev_node_index].len()
             - weights[prev_node_index][current_node_index] +=
               learning_rate * layer.errors[current_node_index] * layers[l-1].outputs[prev_node_index]
+    # Measuring accuracy
+    - error = 0
+    - For row in testing_dataset
+      - forward_propagation(row.inputs, layers)
+      - output_layer = layers[layers.size() - 1]
+      - for i 0..output_layer.size
+        - error += neural_network.cost_function.apply(output_layer.outputs[i], row.outputs[i])
+    - print("Epoch #$epoch, error: $error")
+
+- NeuralNetwork.initialize(learning_rate, cost_function)
+  - return self {
+    cost_function,
+    learning_rate,
+    layers: []
+  }
+
+- NeuralNetwork.add_layer(size, activation_function)
+  - if self.layers.len() == 0
+    - weights_in = [0][0]
+  - else
+    - weights_in = vec[self.layers.len() - 1][size]
+  - outputs = vec[size]
+  - errors = vec[size]
+  - self.layers.push(Layer { size, weights_in, outputs, errors, activation_function })
+  - return self
