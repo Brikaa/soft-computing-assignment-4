@@ -20,7 +20,8 @@
     - Backward propagation
       - For each weight, calculate how much it should be changed
 
-- wab_k_new = wab_k + (error_b_(k+1) * output_a_k)
-- error_b_k (output layer sigmoid) = output_b_k * (1 - output_b_k) * (target_b - output_b_k)
-- error_b_k (output layer linear) = target_b - output_b_k
-- error_b_k (hidden layer sigmoid) = output_b_k * (1 - output_b_k) * (error_d_(k+1) * wbd_k for d in neighbors of b)
+- wds_new = wds + η * error_d * output_s
+- error_d (output layer) = (expected_d - output_d) * derivative_act_of_d's_layer(output_d)
+- error_d (hidden layer) = (sum(error_i * wid for i in neighbors of d)) * derivative_act_of_d's_layer(output_d)
+
+- derivative_act is always the rate of change of activation function with respect to the input var
