@@ -99,8 +99,8 @@
 - get_output_layer_mut(layers)
   - return layers[layers.len() - 1]
 
-- forward_propagation(inputs, layers)
-  - get_input_layer_mut(layers).outputs = inputs.clone()
+- forward_propagation(features, layers)
+  - get_input_layer_mut(layers).outputs = features.clone()
   - For l 1..layers.len()
     - layer = mutable reference layers[l]
     - inputs = layers[l - 1].outputs * layer.weights_in
