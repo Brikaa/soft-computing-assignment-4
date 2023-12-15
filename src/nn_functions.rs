@@ -11,7 +11,13 @@ pub struct CostFunction {
 }
 
 fn apply_sigmoid(x: f64) -> f64 {
-    1.0 / (1.0 + E.powf(-x))
+    let mut res = 1.0 / (1.0 + E.powf(-x));
+    if res <= 0.00001 {
+        res = 0.00001;
+    } else if res >= 0.99999 {
+        res = 0.99999;
+    }
+    return res;
 }
 
 fn apply_sigmoid_derivative(_: f64, function_output: f64) -> f64 {
