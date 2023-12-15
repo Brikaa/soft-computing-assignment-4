@@ -1,28 +1,28 @@
 use std::f64::consts::E;
 
 pub struct ActivationFunction {
-    pub apply: fn(f64) -> f64,
-    pub apply_derivative: fn(f64) -> f64,
+    pub apply: fn(x: f64) -> f64,
+    pub apply_derivative: fn(x: f64, function_output: f64) -> f64,
 }
 
 pub struct CostFunction {
-    pub apply: fn(f64, f64) -> f64,
-    pub apply_derivative: fn(f64, f64) -> f64,
+    pub apply: fn(output: f64, expected: f64) -> f64,
+    pub apply_derivative: fn(output: f64, expected: f64) -> f64,
 }
 
 fn apply_sigmoid(x: f64) -> f64 {
     1.0 / (1.0 + E.powf(-x))
 }
 
-fn apply_sigmoid_derivative(prev_x: f64) -> f64 {
-    prev_x * (1.0 - prev_x)
+fn apply_sigmoid_derivative(_: f64, function_output: f64) -> f64 {
+    function_output * (1.0 - function_output)
 }
 
 fn apply_linear(x: f64) -> f64 {
     x
 }
 
-fn apply_linear_derivative(_: f64) -> f64 {
+fn apply_linear_derivative(_: f64, _: f64) -> f64 {
     1.0
 }
 
@@ -34,7 +34,7 @@ fn apply_mean_squared_error_derivative(output: f64, expected: f64) -> f64 {
     expected - output
 }
 
-pub const SIGMOID_WITH_PREV_OUTPUT_DERIVATIVE: ActivationFunction = ActivationFunction {
+pub const SIGMOID: ActivationFunction = ActivationFunction {
     apply: apply_sigmoid,
     apply_derivative: apply_sigmoid_derivative,
 };
