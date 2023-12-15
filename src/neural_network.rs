@@ -61,7 +61,7 @@ fn backward_propagation(
 ) {
     // Errors for output layer neurons
     let output_layer = get_output_layer_mut(layers);
-    for n in 0..output_layer.outputs.len() {
+    for n in 0..output_layer.size {
         let output = output_layer.outputs[n];
         output_layer.errors[n] = (cost_function.apply_derivative)(output, targets[n])
             * (output_layer.activation_function.apply_derivative)(output_layer.inputs[n], output);
@@ -78,13 +78,13 @@ fn backward_propagation(
                 * (layers[l].activation_function.apply_derivative)(
                     layers[l].inputs[n],
                     layers[l].outputs[n],
-                )
+                );
         }
     }
     // Weight updates
     for l in 1..layers.len() {
-        for prev_node_index in 0..(&layers[l]).weights_in.len() {
-            for current_node_index in 0..(&layers[l]).weights_in.row(prev_node_index).len() {
+        for prev_node_index in 0..(&layers[l]).weights_in.nrows() {
+            for current_node_index in 0..(&layers[l]).weights_in.ncols() {
                 (&mut layers[l]).weights_in[[prev_node_index, current_node_index]] += learning_rate
                     * (&layers[l]).errors[current_node_index]
                     * layers[l - 1].outputs[prev_node_index];
