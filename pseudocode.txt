@@ -160,6 +160,9 @@
     - weights_in = [0][0]
   - else
     - weights_in = vec[self.layers[self.layers.len() - 1].size][size]
+    - for node_index in 0..size
+      - for prev_node_index in 0..prev_layer.size
+        - weights[prev_node_index][node_index] = random_float(-1/prev_layer.size, 1/prev_layer.size)
   - outputs = vec[size]
   - errors = vec[size]
   - inputs = vec[size]
@@ -192,16 +195,16 @@
     .add_layer(8, sigmoid)
     .add_layer(1, linear)
   - for i in 1..=2
-  - read no_training_inputs
-  - while no_training_inputs--
-    - i1, i2, i3, i4 = read
-    - o = read
-    - inputs = [i1, i2, i3, i4]
-    - outputs = [o]
-    - if i == 1
-      - neural_network.add_training_row(inputs, outputs)
-    - else
-      - neural_network.add_testing_row(inputs, outputs)
+    - read no_inputs
+    - while no_inputs--
+      - i1, i2, i3, i4 = read
+      - o = read
+      - inputs = [i1, i2, i3, i4]
+      - outputs = [o]
+      - if i == 1
+        - neural_network.add_testing_row(inputs, outputs)
+      - else
+        - neural_network.add_training_row(inputs, outputs)
   - neural_network.train(11, 0.1, mean_squared_error)
   - while true
     - i = read float

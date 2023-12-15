@@ -1,4 +1,5 @@
 use ndarray::{Array, Array1, Array2};
+use rand::{thread_rng, Rng};
 
 use crate::nn_functions::{ActivationFunction, CostFunction};
 
@@ -108,13 +109,17 @@ fn get_error(
     error
 }
 
-fn add_row(inputs: Vec<f64>, outputs: Vec<f64>, layers: &Vec<Layer>, dataset: &mut Dataset) {
+fn panic_if_not_input_ready(layers: &Vec<Layer>, inputs: &Vec<f64>) {
     if layers.len() < 2 {
         panic!("At least an input and output layer must exist before adding a dataset row");
     }
     if inputs.len() != get_input_layer(layers).size {
         panic!("Size of dataset inputs mismatches with size of input layer");
     }
+}
+
+fn add_row(inputs: Vec<f64>, outputs: Vec<f64>, layers: &Vec<Layer>, dataset: &mut Dataset) {
+    panic_if_not_input_ready(layers, &inputs);
     if outputs.len() != get_output_layer(layers).size {
         panic!("Size of dataset outputs mismatches with size of output layer");
     }
@@ -150,7 +155,16 @@ impl NeuralNetwork {
 
     pub fn add_layer(mut self, size: usize, activation_function: ActivationFunction) -> Self {
         let weights_in = match self.layers.last() {
-            Some(layer) => Array::zeros((layer.size, size)),
+            Some(layer) => {
+                let mut arr = Array::zeros((layer.size, size));
+                for node_index in 0..size {
+                    for prev_node_index in 0..layer.size {
+                        arr[[prev_node_index, node_index]] = thread_rng()
+                            .gen_range(-1.0 / (layer.size as f64)..=1.0 / (layer.size as f64));
+                    }
+                }
+                arr
+            }
             None => Array::zeros((1, 1)),
         };
         let outputs = Array1::zeros(size);
@@ -174,6 +188,12 @@ impl NeuralNetwork {
 
     pub fn add_testing_row(mut self, inputs: Vec<f64>, outputs: Vec<f64>) -> Self {
         add_row(inputs, outputs, &self.layers, &mut self.testing_dataset);
+        self
+    }
+
+    pub fn propagate(mut self, inputs: Vec<f64>) -> Self {
+        panic_if_not_input_ready(&self.layers, &inputs);
+        forward_propagation(&inputs, &mut self.layers);
         self
     }
 
