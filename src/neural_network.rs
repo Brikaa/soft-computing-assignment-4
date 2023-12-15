@@ -152,9 +152,7 @@ impl NeuralNetwork {
                 backward_propagation(learning_rate, &cost_function, &row.outputs, layers);
             }
             let error = get_error(&self.testing_dataset, &cost_function, layers);
-            if epoch % 1000 == 0 || epoch == no_epochs {
-                eprintln!("Epoch #{}, error: {}", epoch, error);
-            }
+            eprintln!("Epoch #{}, error: {}", epoch, error);
         }
         self
     }
