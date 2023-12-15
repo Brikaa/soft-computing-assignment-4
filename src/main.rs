@@ -4,6 +4,7 @@ mod nn_functions;
 use std::{fmt, str::FromStr};
 
 use neural_network::NeuralNetwork;
+use nn_functions::RELU;
 #[macro_use]
 extern crate scan_fmt;
 
@@ -27,8 +28,8 @@ where
 fn main() {
     let mut nn = NeuralNetwork::new();
     nn = nn
-        .add_layer(4, SIGMOID)
-        .add_layer(8, SIGMOID)
+        .add_layer(4, RELU) // Doesn't matter, this is the input layer
+        .add_layer(20, SIGMOID)
         .add_layer(1, LINEAR);
     for i in 1..=2 {
         let no_inputs = scanln_fmt!("{}", u32).unwrap();

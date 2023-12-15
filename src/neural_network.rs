@@ -46,6 +46,7 @@ fn forward_propagation(features: &Vec<f64>, layers: &mut Vec<Layer>) {
     input_layer.inputs = Array::from_vec(features.clone());
     input_layer.outputs = Array::from_vec(features.clone());
     for l in 1..layers.len() {
+        eprintln!("Layer {} outputs: {:?}", l, layers[l].outputs);
         layers[l].inputs = layers[l - 1].outputs.dot(&layers[l].weights_in);
         layers[l].outputs = layers[l]
             .inputs
@@ -142,6 +143,10 @@ impl NeuralNetwork {
         cost_function: CostFunction,
     ) -> Self {
         let layers = &mut self.layers;
+        println!(
+            "Before starting, error: {}",
+            get_error(&self.testing_dataset, &cost_function, layers)
+        );
         for epoch in 1..=no_epochs {
             for row in &self.training_dataset {
                 forward_propagation(&row.inputs, layers);
@@ -160,7 +165,7 @@ impl NeuralNetwork {
                 for node_index in 0..size {
                     for prev_node_index in 0..layer.size {
                         arr[[prev_node_index, node_index]] = thread_rng()
-                            .gen_range(-1.0 / (layer.size as f64)..=1.0 / (layer.size as f64));
+                            .gen_range((-0.1 / (layer.size as f64))..=(0.1 / (layer.size as f64)));
                     }
                 }
                 arr

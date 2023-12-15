@@ -34,6 +34,22 @@ fn apply_mean_squared_error_derivative(output: f64, expected: f64) -> f64 {
     expected - output
 }
 
+fn apply_relu(x: f64) -> f64 {
+    if x < 0_f64 {
+        return 0_f64;
+    } else {
+        return x;
+    }
+}
+
+fn apply_relu_derivative(x: f64, _: f64) -> f64 {
+    if x < 0_f64 {
+        return 0_f64;
+    } else {
+        return 1_f64;
+    }
+}
+
 pub const SIGMOID: ActivationFunction = ActivationFunction {
     apply: apply_sigmoid,
     apply_derivative: apply_sigmoid_derivative,
@@ -42,6 +58,11 @@ pub const SIGMOID: ActivationFunction = ActivationFunction {
 pub const LINEAR: ActivationFunction = ActivationFunction {
     apply: apply_linear,
     apply_derivative: apply_linear_derivative,
+};
+
+pub const RELU: ActivationFunction = ActivationFunction {
+    apply: apply_relu,
+    apply_derivative: apply_relu_derivative,
 };
 
 pub const MEAN_SQUARED_ERROR: CostFunction = CostFunction {

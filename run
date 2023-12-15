@@ -1,2 +1,2 @@
 #!/bin/bash
-cargo run --release < data.txt
+cargo run --release < <(cat data.txt -)
