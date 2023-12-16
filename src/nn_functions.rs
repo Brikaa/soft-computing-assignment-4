@@ -32,6 +32,14 @@ fn apply_linear_derivative(_: f64, _: f64) -> f64 {
     1.0
 }
 
+fn apply_tanh(x: f64) -> f64 {
+    f64::tanh(x)
+}
+
+fn apply_tanh_derivative(_: f64, function_output: f64) -> f64 {
+    1.0 - function_output * function_output
+}
+
 fn apply_mean_squared_error(output: f64, expected: f64) -> f64 {
     0.5 * (expected - output) * (expected - output)
 }
@@ -69,6 +77,11 @@ pub const LINEAR: ActivationFunction = ActivationFunction {
 pub const RELU: ActivationFunction = ActivationFunction {
     apply: apply_relu,
     apply_derivative: apply_relu_derivative,
+};
+
+pub const TANH: ActivationFunction = ActivationFunction {
+    apply: apply_tanh,
+    apply_derivative: apply_tanh_derivative,
 };
 
 pub const MEAN_SQUARED_ERROR: CostFunction = CostFunction {
