@@ -29,7 +29,7 @@ fn main() {
     let mut nn = NeuralNetwork::new();
     nn = nn
         .add_layer(4, SIGMOID) // Doesn't matter, this is the input layer
-        .add_layer(20, SIGMOID)
+        .add_layer(9, SIGMOID)
         .add_layer(1, LINEAR);
     let i1_d = 286_f64;
     let i2_d = 178_f64;
