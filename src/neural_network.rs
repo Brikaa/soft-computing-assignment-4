@@ -83,8 +83,8 @@ fn backward_propagation(
     }
     // Weight updates
     for l in 1..layers.len() {
-        for prev_node_index in 0..(&layers[l]).weights_in.nrows() {
-            for current_node_index in 0..(&layers[l]).weights_in.ncols() {
+        for prev_node_index in 0..(&layers[l - 1]).size {
+            for current_node_index in 0..(&layers[l]).size {
                 (&mut layers[l]).weights_in[[prev_node_index, current_node_index]] += learning_rate
                     * (&layers[l]).errors[current_node_index]
                     * layers[l - 1].outputs[prev_node_index];
