@@ -49,7 +49,7 @@ fn main() {
             }
         }
     }
-    nn = nn.train(9, 0.01, MEAN_SQUARED_ERROR);
+    nn = nn.train(4000, 0.0001, MEAN_SQUARED_ERROR);
     loop {
         let i1 = get_input::<f64>("Cement");
         let i2 = get_input::<f64>("Water");
